@@ -44,6 +44,8 @@ public class OrdersListsEntity {
     // Зв'язок One-to-Many: Одне Замовлення на Товари може мати багато Переліків Товарів
     private List<GoodsOrdersEntity> goodsOrders = new ArrayList<>();
 
+
+
     public void setId(Long id) {
         this.id = id;
     }

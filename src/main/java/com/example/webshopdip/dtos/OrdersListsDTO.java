@@ -59,8 +59,8 @@ public class OrdersListsDTO {
         return number;
     }
 
-    public CustomersEntity getCustomers(CustomersEntity customers) {
-        return this.customers;
+    public CustomersEntity getCustomers() {
+        return customers;
     }
 
     public PaymentsTypeEntity getPaymentsType() {
@@ -99,11 +99,11 @@ public class OrdersListsDTO {
         return deliveriesMethod;
     }
 
-    public String getAddress_delivery(String addressDelivery) {
+    public String getAddress_delivery() {
         return address_delivery;
     }
 
-    public List<GoodsOrdersEntity> getGoodsOrders(List<GoodsOrdersEntity> goodsOrders) {
+    public List<GoodsOrdersEntity> getGoodsOrders() {
         return this.goodsOrders;
     }
 

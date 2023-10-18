@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GoodsOrdersRepository extends JpaRepository<GoodsOrdersEntity, Long> {
     //GoodsOrdersEntity findById (Long Id);
+
 }
