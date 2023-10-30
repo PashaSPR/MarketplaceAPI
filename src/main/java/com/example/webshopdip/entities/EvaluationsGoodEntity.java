@@ -25,9 +25,9 @@ public class EvaluationsGoodEntity {
     @JoinColumn(name = "goods_id", referencedColumnName = "id")
     // Зв'язок Many-to-One: Багато оцінок може належати одному товару
     private GoodsEntity goods;
-    @ManyToOne
-    @JsonBackReference
-    @JoinColumn(name = "customers_id", referencedColumnName = "id")
-    // Зв'язок Many-to-One: Багато Покупців можуть поставити одну оцінку на різні товарів
-    private CustomersEntity customers;
+//    @OneToOne
+//    @JsonBackReference
+//    @JoinColumn(name = "customers_id", referencedColumnName = "id")
+//    // Зв'язок Many-to-One: Багато Покупців можуть поставити одну оцінку на різні товарів
+//    private CustomersEntity customers;
 }

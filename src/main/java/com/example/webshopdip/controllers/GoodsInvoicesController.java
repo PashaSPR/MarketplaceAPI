@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/goodsinvoices")
+@RequestMapping("/goodsinvoices")//МЕТОД ВИДАЛЕННЯ ДАНИХ
 public class GoodsInvoicesController {
     @Autowired
     private GoodsInvoicesService goodsInvoicesService;

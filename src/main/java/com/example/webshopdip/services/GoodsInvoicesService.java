@@ -101,7 +101,7 @@ public class GoodsInvoicesService {
 //        return dto;
 //    }
 // /////////////////////////////////////////////////////////////////////////////////
-
+    //ДОДАТИ sellerId до збереження
     public GoodsInvoicesDTO createGoodsInvoices(GoodsInvoicesToSaveDTO dto) {
         GoodsInvoicesEntity entity = new GoodsInvoicesEntity();
 

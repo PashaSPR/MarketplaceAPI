@@ -2,10 +2,7 @@ package com.example.webshopdip.controllers;
 
 import com.example.webshopdip.dtos.*;
 import com.example.webshopdip.entities.*;
-import com.example.webshopdip.repositories.CustomersRepository;
-import com.example.webshopdip.repositories.GoodsInvoicesRepository;
-import com.example.webshopdip.repositories.GoodsRepository;
-import com.example.webshopdip.repositories.OrdersListsRepository;
+import com.example.webshopdip.repositories.*;
 import com.example.webshopdip.services.GoodsInvoicesService;
 import com.example.webshopdip.services.GoodsOrdersService;
 import com.example.webshopdip.services.GoodsService;
@@ -34,16 +31,20 @@ public class GoodsOrdersController {
     @Autowired
     private OrdersListsService ordersListsService;
     @Autowired
+    private GoodsInvoicesService goodsInvoicesService;
+    @Autowired
     private OrderListsController orderListsController;
     @Autowired
     private OrdersListsRepository ordersListsRepository;
-    private GoodsInvoicesService goodsInvoicesService;
+    @Autowired
+    private GoodsOrdersRepository goodsOrdersRepository;
     @Autowired
     private GoodsInvoicesRepository goodsInvoicesRepository;
     @Autowired
     private GoodsRepository goodsRepository;
     @Autowired
     private CustomersRepository customersRepository;
+
     /*
     id customers через ордер ліст з перевіркою
     id goodsInvoices
@@ -56,42 +57,45 @@ public class GoodsOrdersController {
     orderListsController.createOrdersLists(1);
     }
     * */
-//    @PostMapping
-//    public ResponseEntity<GoodsOrdersDTO> createGoodsOrders(@RequestBody GoodsOrdersDTO goodsOrdersDTO) {
-//
-//        try {
-//            Optional<GoodsEntity> goodsEntityOptional = goodsRepository.findById(goodsOrdersDTO.getGoodsInvoicesDTO().getGoods().getId());
-//
-//            if (goodsEntityOptional.isPresent()) {
-//                GoodsEntity goodsEntity = goodsEntityOptional.get();
-//
-//                GoodsInvoicesDTO goodsInvoicesDTO = goodsInvoicesService.getOne(goodsOrdersDTO.getGoodsInvoicesDTO().getId());
-//                goodsInvoicesDTO.setGoods(goodsService.entityToDTO(goodsEntity));
-//
-//                goodsOrdersDTO.setGoodsInvoicesDTO(goodsInvoicesDTO);
-//
-////                GoodsOrdersDTO createdDTO = goodsOrdersService.createGoodsOrders(goodsOrdersDTO);
-////                return ResponseEntity.ok(createdDTO);
-//                orderListsController.createOrdersLists(goodsEntity.getId());
-//                return ResponseEntity.ok(goodsOrdersDTO);
-//            } else {
-//                return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити випадок, коли товар не знайдено
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити помилку
-//        }
-//    }
-    @PostMapping("/createGoodsOrders")
-    public ResponseEntity<GoodsOrdersDTO> createGoodsOrders(
-            @RequestParam Long customersId,
-            @RequestParam Long goodsInvoicesId) {
+    @PostMapping
+    public ResponseEntity<GoodsOrdersDTO> createGoodsOrders(@RequestBody GoodsOrdersToSaveDTO goodsOrdersToSaveDTO) {
+
         try {
-            GoodsOrdersDTO createdGoodsOrder = goodsOrdersService.createGoodsOrders(customersId, goodsInvoicesId);
-            return ResponseEntity.ok(createdGoodsOrder);
+            Optional<GoodsInvoicesEntity> goodsInvoicesEntityOptional = goodsInvoicesRepository.findById(goodsOrdersToSaveDTO.getGoodsInvoicesId());
+//            System.out.println("goodsInvoicesEntityOptional: " + goodsInvoicesEntityOptional);
+//            System.out.println("goodsOrdersDTO: " + goodsOrdersDTO);
+            if (goodsInvoicesEntityOptional.isPresent()) {
+                GoodsInvoicesEntity goodsInvoicesEntity = goodsInvoicesEntityOptional.get();
+                goodsOrdersToSaveDTO.setGoodsInvoicesId(goodsInvoicesService.entityToDTO(goodsInvoicesEntity).getId());
+                GoodsOrdersDTO createOrders = goodsOrdersService.createGoodsOrders(goodsOrdersToSaveDTO);
+
+                return ResponseEntity.ok(createOrders);
+            } else {
+                return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити випадок, коли товар не знайдено
+            }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new GoodsOrdersDTO());
+            return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити помилку
         }
     }
+    @PostMapping("/addToCart")
+    public ResponseEntity<GoodsOrdersDTO> addToCart(@RequestBody GoodsOrdersToSaveDTO goodsOrdersToSaveDTO){
+//чи є в OrdersLists запис де поле Number пусте, а поле customerId==id покупця
+//        якщо є такий запис то ordersListsId(Postman)= id цього запису
+// якщо немає то створюємо запис
+
+        return createGoodsOrders(goodsOrdersToSaveDTO);
+    }
+//    @PostMapping("/createGoodsOrders")
+//    public ResponseEntity<GoodsOrdersDTO> createGoodsOrders(
+//            @RequestParam Long customersId,
+//            @RequestParam Long goodsInvoicesId) {
+//        try {
+//            GoodsOrdersDTO createdGoodsOrder = goodsOrdersService.createGoodsOrders(customersId, goodsInvoicesId);
+//            return ResponseEntity.ok(createdGoodsOrder);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(new GoodsOrdersDTO());
+//        }
+//    }
 
 
 //    @PostMapping("/createGoodsOrders")
@@ -146,66 +150,63 @@ public class GoodsOrdersController {
 //    @PostMapping()
 //    public ResponseEntity<GoodsOrdersDTO> createGoodsOrders(@RequestBody GoodsOrdersDTO goodsOrdersDTO) {
 //        try {
-//
-//            Optional<GoodsInvoicesEntity> goodsInvoicesEntityOptional = goodsInvoicesRepository.findById(goodsOrdersDTO.getGoodsInvoicesDTO().getGoods().getId());
-//            Long customer_id = customersRepository.findById()
-//            if (goodsInvoicesEntityOptional.isPresent()) {
-//                GoodsInvoicesEntity goodsEntity = goodsInvoicesEntityOptional.get();
-//
-//                GoodsInvoicesDTO goodsInvoicesDTO = goodsInvoicesService.getOne(goodsOrdersDTO.getGoodsInvoicesDTO().getId());
-//                goodsOrdersDTO.setGoodsInvoicesDTO(goodsInvoicesDTO);
-//
-//                GoodsOrdersDTO createdDTO = goodsOrdersService.createGoodsOrders(goodsOrdersDTO);
-//
-//                // Викликаємо метод для створення списку замовлень
-//                orderListsController.createOrdersLists(goodsEntity.getId());
-//
-//                return ResponseEntity.ok(createdDTO);
-//            } else {
-//                return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити випадок, коли товар не знайдено
-//            }
+//            GoodsOrdersDTO createdGoodsOrder = goodsOrdersService.createGoodsOrders(goodsOrdersDTO);
+//            return ResponseEntity.ok(createdGoodsOrder);
 //        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body(new GoodsOrdersDTO()); // Обробити помилку
+//            return ResponseEntity.badRequest().body(new GoodsOrdersDTO());
 //        }
 //    }
 
-    @GetMapping
+    @GetMapping//виправлено 18.10.23 18:10
     public ResponseEntity<List<GoodsOrdersDTO>> getAll(HttpServletRequest request) {
-        List<GoodsOrdersDTO> goodsOrdersDTOS = goodsOrdersService.getAll(request);
-        return new ResponseEntity<>(goodsOrdersDTOS, HttpStatus.OK);
+        List<GoodsOrdersDTO> goodsOrdersEntities = goodsOrdersService.getAll(request);
+//        Iterable<GoodsOrdersEntity> goodsOrdersEntities = goodsOrdersRepository.findAll();
+        return new ResponseEntity<>(goodsOrdersEntities, HttpStatus.OK);
     }
 
-    @GetMapping("/getOne")
+//    @GetMapping("/getAllByCustomer")//18.10 після 21 00
+//    public ResponseEntity<Iterable<GoodsOrdersEntity>> getAllByCustomer(@RequestParam Long id) {
+//        return new ResponseEntity<>(goodsOrdersService.getAllByCustomer(id), HttpStatus.OK);
+//    }
+@GetMapping("/getAllByCustomer")//22.10 23:30
+public ResponseEntity<Iterable<GoodsOrdersDTO>> getAllByCustomer(@RequestParam Long id) {
+    Iterable<GoodsOrdersEntity> goodsOrdersByCustomer = goodsOrdersService.getAllByCustomer(id);
+    Iterable<GoodsOrdersDTO> goodsOrdersDTOByCustomer = goodsOrdersService.convertToDTO(goodsOrdersByCustomer);
+    return ResponseEntity.ok(goodsOrdersDTOByCustomer);
+}
+
+
+    @GetMapping("/getOne")//18.10 після 21 00
     public ResponseEntity<GoodsOrdersDTO> getOneGoodsOrders(@RequestParam Long id, HttpServletRequest request) {
 //        System.out.println("id: " + id);
         try {
             GoodsOrdersDTO dto = goodsOrdersService.getOne(id);
-
-//            GoodsInvoicesDTO goodsInvoicesDTO = goodsInvoicesService.getOne(dto.getGoodsInvoicesDTO().getId());
-//            goodsInvoicesDTO
-            String currentUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-
-            List<PhotosGoodsDTO> photos = dto.getGoodsInvoicesDTO().getGoods().getPhotosGoodsDTOS();
-            for (PhotosGoodsDTO photo : photos) {
-                String imagePath = currentUrl + "/images/" + photo.getPath();
-                photo.setPath(imagePath);
-            }
-
-            GoodsInvoicesEntity entity = goodsInvoicesRepository.findById(id).orElse(new GoodsInvoicesEntity());
-
-            System.out.println("PropertiesGoods.size: " + entity.getGoods().getPropertiesGoods().size());
-            List<PropertiesGoodsEntity> propertiesGoodsList = entity.getGoods().getPropertiesGoods();
-            List<PropertiesGoodsDTO> propertiesDTOList = new ArrayList<>();
-            for (PropertiesGoodsEntity propertiesGoods : propertiesGoodsList) {
-                PropertiesNameGoodsEntity propertiesNameGoods = propertiesGoods.getPropertiesNameGoods();
-                PropertiesGoodsDTO propertiesGoodsDTO = new PropertiesGoodsDTO();
-                propertiesGoodsDTO.setId(propertiesGoods.getId());
-                propertiesGoodsDTO.setValue(propertiesGoods.getValue());
-                propertiesGoodsDTO.setPropertiesName(propertiesNameGoods.getName()); // Додаємо назву властивості
-                propertiesGoodsDTO.setType(propertiesNameGoods.getValueType()); // Додаємо тип значення властивості
-                propertiesDTOList.add(propertiesGoodsDTO);
-            }
-            dto.getGoodsInvoicesDTO().getGoods().setPropertiesGoodsDTOS(propertiesDTOList);
+//
+////            GoodsInvoicesDTO goodsInvoicesDTO = goodsInvoicesService.getOne(dto.getGoodsInvoicesDTO().getId());
+////            goodsInvoicesDTO
+//            String currentUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+//
+//            List<PhotosGoodsDTO> photos = dto.getGoodsInvoicesDTO().getGoods().getPhotosGoodsDTOS();
+//            for (PhotosGoodsDTO photo : photos) {
+//                String imagePath = currentUrl + "/images/" + photo.getPath();
+//                photo.setPath(imagePath);
+//            }
+//
+//            GoodsInvoicesEntity entity = goodsInvoicesRepository.findById(id).orElse(new GoodsInvoicesEntity());
+//
+//            System.out.println("PropertiesGoods.size: " + entity.getGoods().getPropertiesGoods().size());
+//            List<PropertiesGoodsEntity> propertiesGoodsList = entity.getGoods().getPropertiesGoods();
+//            List<PropertiesGoodsDTO> propertiesDTOList = new ArrayList<>();
+//            for (PropertiesGoodsEntity propertiesGoods : propertiesGoodsList) {
+//                PropertiesNameGoodsEntity propertiesNameGoods = propertiesGoods.getPropertiesNameGoods();
+//                PropertiesGoodsDTO propertiesGoodsDTO = new PropertiesGoodsDTO();
+//                propertiesGoodsDTO.setId(propertiesGoods.getId());
+//                propertiesGoodsDTO.setValue(propertiesGoods.getValue());
+//                propertiesGoodsDTO.setPropertiesName(propertiesNameGoods.getName()); // Додаємо назву властивості
+//                propertiesGoodsDTO.setType(propertiesNameGoods.getValueType()); // Додаємо тип значення властивості
+//                propertiesDTOList.add(propertiesGoodsDTO);
+//            }
+//            dto.getGoodsInvoicesDTO().getGoods().setPropertiesGoodsDTOS(propertiesDTOList);
 
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
@@ -214,12 +215,12 @@ public class GoodsOrdersController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteGoodsOrders(@PathVariable Long id) {
+    public ResponseEntity<String> deleteGoodsOrders(@PathVariable Long id) {
         try {
 
             goodsOrdersService.delete(id);
 
-            return ResponseEntity.ok("Замовлення успішно видалено");
+            return ResponseEntity.ok("Delete order");
         } catch (Exception e) {
             return ResponseEntity.ok(e.getMessage());
         }
